@@ -49,16 +49,23 @@ def findOrder():
     for i in orderData:
         template = cv.imread(f'templates/orders/{i}.png', cv.IMREAD_UNCHANGED)
         result = cv.matchTemplate(screenshot, template, cv.TM_CCORR_NORMED)
+        imageInfo = cv.minMaxLoc(result)
 
-        confidence = cv.minMaxLoc(result)[1]
+
+        confidence = imageInfo[1]
+        topLeft = imageInfo[3]
+        bottomRight = topLeft[0] + template.shape[1], topLeft[1] + template.shape[0]
+
         orderData[i]['confidence'] = confidence
+        orderData[i]['topLeft'] = topLeft
+        orderData[i]['bottomRight'] = bottomRight
 
-    output = []
+    order = []
     for i in orderData:
         if (orderData[i]['confidence'] >= orderData[i]['threshold']):
-            output.append(i)
+            order.append(i)
 
-    return output
+    return orderData, order
 
 def main():
     #start_time = time.time()
@@ -66,12 +73,15 @@ def main():
     #print("--- %s seconds ---" % (time.time() - start_time))
 
     #for i in buttons:
-     #   cv.rectangle(screenshot, buttons[i]['topLeft'], buttons[i]['bottomRight'], color = buttons[i]['color'], thickness = 4, lineType=cv.LINE_4)
+    #    cv.rectangle(screenshot, buttons[i]['topLeft'], buttons[i]['bottomRight'], buttons[i]['color'], 4, cv.LINE_4)
 
-    order = findOrder()
+    orderData, order = findOrder()
+
+    for i in order:
+        cv.rectangle(screenshot, orderData[i]['topLeft'], orderData[i]['bottomRight'], orderData[i]['color'], 4, cv.LINE_4)
+    
     print(order)
-
-    #cv.imshow('Result', screenshot)
-    #cv.waitKey()
+    cv.imshow('Result', screenshot)
+    cv.waitKey()
 
 main()
