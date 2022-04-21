@@ -3,6 +3,7 @@ import time
 import numpy as np
 import copy
 import pyautogui
+import pydirectinput
 
 data = {
     'burger1': {
@@ -11,7 +12,7 @@ data = {
     },
     'burger2': {
         'color': (0,165,255),
-        'threshold': 0.89
+        'threshold': 0.91
     },
     'burger3': {
         'color': (0,255,255),
@@ -23,7 +24,7 @@ data = {
     },
     'drink': {
         'color': (255,0,0),
-        'threshold': 0.90
+        'threshold': 0.85
     }
 }
 
@@ -68,35 +69,48 @@ def findOrder(screenshot):
     return orderData, order
 
 def main():
-    #croppedImage = formattedImage[360:660, 1000:1570]
     screenshot = pyautogui.screenshot()
     screenshot = cv.cvtColor(np.array(screenshot), cv.COLOR_RGB2BGR)   
+    #screenshot = screenshot[570:1440, 175:950]
 
-    start_time = time.time()
     buttons = findButtons(screenshot)
-    print("--- %s seconds ---" % (time.time() - start_time)) 
-
     for i in buttons:
         cv.rectangle(screenshot, buttons[i]['topLeft'], buttons[i]['bottomRight'], buttons[i]['color'], 4, cv.LINE_4)
 
+    screenshot = cv.resize(screenshot, (1280, 720))
     cv.imshow('Result', screenshot)
     cv.waitKey()
+    cv.destroyAllWindows()
 
-    """
-    orderData, order = findOrder()
-
-    for i in order:
-        cv.rectangle(screenshot, orderData[i]['topLeft'], orderData[i]['bottomRight'], orderData[i]['color'], 4, cv.LINE_4)
-    
-    print(order)
-    """
-    #cv.imshow('Result', screenshot)
-    #cv.waitKey()
-    """
+    time.sleep(5)
     while True:
+        screenshot = pyautogui.screenshot()
+        screenshot = cv.cvtColor(np.array(screenshot), cv.COLOR_RGB2BGR)   
+        screenshot = screenshot[360:660, 1000:1570]
+
+        orderData, order = findOrder(screenshot)
+        for i in order:
+            cv.rectangle(screenshot, orderData[i]['topLeft'], orderData[i]['bottomRight'], orderData[i]['color'], 4, cv.LINE_4)
+
+        if order != []:
+            for i in order:
+                pydirectinput.click(buttons[i]['center'][0], buttons[i]['center'][1])
+            pydirectinput.click(buttons['done']['center'][0], buttons['done']['center'][1])
+
+            for i in orderData:
+                print(f'{i}: {orderData[i]["confidence"]}')
+            print(order)
+
+            screenshot = cv.resize(screenshot, (1280, 720))
+            cv.imshow('Result', screenshot)
+            time.sleep(1)
+
         if cv.waitKey(1) == ord('q'):
             cv.destroyAllWindows()
             break
-    """
+
+    screenshot = cv.resize(screenshot, (1280, 720))
+    cv.imshow('Result', screenshot)
+    cv.waitKey(1)
 
 main()
