@@ -1,8 +1,9 @@
 import cv2 as cv
 import time
+import numpy as np
 import copy
+import pyautogui
 
-screenshot = cv.imread('img/order/bloxburg4.png', cv.IMREAD_UNCHANGED)
 data = {
     'burger1': {
         'color': (0,0,255),
@@ -26,12 +27,12 @@ data = {
     }
 }
 
-def findButtons():
+def findButtons(screenshot):
     buttonData = copy.deepcopy(data)
     buttonData['done'] = {'color': (255,0,255)}
 
     for i in buttonData:
-        template = cv.imread(f'templates/buttons/{i}.png', cv.IMREAD_UNCHANGED)
+        template = cv.imread(f'templates/buttons/{i}.png')
         result = cv.matchTemplate(screenshot, template, cv.TM_CCORR_NORMED)
 
         topLeft = cv.minMaxLoc(result)[3] 
@@ -44,13 +45,12 @@ def findButtons():
     
     return buttonData
 
-def findOrder():
+def findOrder(screenshot):
     orderData = copy.deepcopy(data)
     for i in orderData:
-        template = cv.imread(f'templates/orders/{i}.png', cv.IMREAD_UNCHANGED)
+        template = cv.imread(f'templates/orders/{i}.png')
         result = cv.matchTemplate(screenshot, template, cv.TM_CCORR_NORMED)
         imageInfo = cv.minMaxLoc(result)
-
 
         confidence = imageInfo[1]
         topLeft = imageInfo[3]
@@ -68,20 +68,35 @@ def findOrder():
     return orderData, order
 
 def main():
-    #start_time = time.time()
-    #buttons = findButtons()
-    #print("--- %s seconds ---" % (time.time() - start_time))
+    #croppedImage = formattedImage[360:660, 1000:1570]
+    screenshot = pyautogui.screenshot()
+    screenshot = cv.cvtColor(np.array(screenshot), cv.COLOR_RGB2BGR)   
 
-    #for i in buttons:
-    #    cv.rectangle(screenshot, buttons[i]['topLeft'], buttons[i]['bottomRight'], buttons[i]['color'], 4, cv.LINE_4)
+    start_time = time.time()
+    buttons = findButtons(screenshot)
+    print("--- %s seconds ---" % (time.time() - start_time)) 
 
+    for i in buttons:
+        cv.rectangle(screenshot, buttons[i]['topLeft'], buttons[i]['bottomRight'], buttons[i]['color'], 4, cv.LINE_4)
+
+    cv.imshow('Result', screenshot)
+    cv.waitKey()
+
+    """
     orderData, order = findOrder()
 
     for i in order:
         cv.rectangle(screenshot, orderData[i]['topLeft'], orderData[i]['bottomRight'], orderData[i]['color'], 4, cv.LINE_4)
     
     print(order)
-    cv.imshow('Result', screenshot)
-    cv.waitKey()
+    """
+    #cv.imshow('Result', screenshot)
+    #cv.waitKey()
+    """
+    while True:
+        if cv.waitKey(1) == ord('q'):
+            cv.destroyAllWindows()
+            break
+    """
 
 main()
