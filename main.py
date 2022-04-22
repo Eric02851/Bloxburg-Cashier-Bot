@@ -109,7 +109,7 @@ def main():
             cv.destroyAllWindows()
             break
 
-        time.sleep(3)
+        time.sleep(2)
     screenshot = cv.resize(screenshot, (1280, 720))
     cv.imshow('Result', screenshot)
     cv.waitKey(1)
