@@ -8,11 +8,11 @@ import pydirectinput
 data = {
     'burger1': {
         'color': (0,0,255),
-        'threshold': 0.89
+        'threshold': 0.898
     },
     'burger2': {
         'color': (0,165,255),
-        'threshold': 0.91
+        'threshold': 0.905
     },
     'burger3': {
         'color': (0,255,255),
@@ -20,11 +20,11 @@ data = {
     },
     'fries': {
         'color': (0,255,0),
-        'threshold': 0.90
+        'threshold': 0.89
     },
     'drink': {
         'color': (255,0,0),
-        'threshold': 0.85
+        'threshold': 0.88
     }
 }
 
@@ -109,6 +109,7 @@ def main():
             cv.destroyAllWindows()
             break
 
+        time.sleep(3)
     screenshot = cv.resize(screenshot, (1280, 720))
     cv.imshow('Result', screenshot)
     cv.waitKey(1)
